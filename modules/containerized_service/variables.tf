@@ -32,3 +32,25 @@ variable "mount_path" {
   type    = string
   default = null
 }
+
+variable "ports" {
+  type = list(object({
+    internal = number
+    external = number
+  }))
+  default = []
+}
+
+variable "env" {
+  type    = list(string)
+  default = []
+}
+
+variable "volumes" {
+  type = list(object({
+    container_path = string
+    volume_name    = string
+    read_only      = optional(bool, false)
+  }))
+  default = []
+}

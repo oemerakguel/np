@@ -1,38 +1,3 @@
-variable "image" {
-  type = string
-}
-
-variable "container_name" {
-  type = string
-}
-
-variable "network_name" {
-  type = string
-}
-
-variable "ports" {
-  type = list(object({
-    internal = number
-    external = number
-  }))
-  default = []
-}
-
-variable "env" {
-  type    = list(string)
-  default = []
-}
-
-variable "volumes" {
-  type = list(object({
-    container_path = string
-    volume_name    = string
-    read_only      = optional(bool, false)
-  }))
-  default = []
-}
-
-
 resource "docker_container" "this" {
   image = var.image
   name  = var.container_name
@@ -51,19 +16,32 @@ resource "docker_container" "this" {
     }
   }
 
-  env           = var.env
-  restart       = "no"
-  must_run      = true
+  env            = var.env
+  restart        = "no"
+  must_run       = true
   remove_volumes = true
-  start         = true
+  start          = true
 
-  dynamic "volumes" {
-    for_each = var.volumes
+  dynamic "mounts" {
+    for_each = var.volume_name != null && var.mount_path != null ? [1] : []
     content {
-      container_path = volumes.value.container_path
-      volume_name    = volumes.value.volume_name
-      read_only      = lookup(volumes.value, "read_only", false)
+      target    = var.mount_path
+      source    = var.volume_name
+      type      = "volume"
+      read_only = false
     }
   }
+
+dynamic "mounts" {
+  for_each = var.volumes
+  content {
+    target    = mounts.value.container_path
+    source    = mounts.value.volume_name
+    type      = "bind"
+    read_only = lookup(mounts.value, "read_only", false)
+  }
 }
+
+}
+
 

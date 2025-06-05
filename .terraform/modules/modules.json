@@ -1,1 +1,1 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"app","Source":"./modules/containerized_service","Dir":"modules/containerized_service"},{"Key":"redis","Source":"./modules/containerized_service","Dir":"modules/containerized_service"}]}
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"app","Source":"./modules/containerized_service","Dir":"modules/containerized_service"},{"Key":"nginx","Source":"./modules/containerized_service","Dir":"modules/containerized_service"},{"Key":"redis","Source":"./modules/containerized_service","Dir":"modules/containerized_service"}]}

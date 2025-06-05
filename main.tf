@@ -9,14 +9,16 @@ terraform {
 
 provider "docker" {}
 
-# Netzwerk
 resource "docker_network" "app_network" {
   name = "app-network"
 }
 
-# Volume (z. B. für Redis oder App-Daten)
 resource "docker_volume" "app_data" {
   name = "app-data"
+}
+
+resource "docker_volume" "nginx_config" {
+  name = "nginx-config"
 }
 
 module "redis" {
@@ -31,9 +33,28 @@ module "redis" {
   mount_path      = "/data"
 }
 
+module "nginx" {
+  source          = "./modules/containerized_service"
+  image           = "nginx:alpine"
+  container_name  = "nginx-service"
+  internal_port   = 80
+  external_port   = 80
+  environment_vars = []
+  network_name    = docker_network.app_network.name
+
+  volumes = [
+    {
+      container_path = "/etc/nginx"
+      volume_name    = "C:/Users/moi/workspace/24-08-on/terraform/np/nginx_conf"
+      read_only      = true
+    }
+  ]
+}
+
+
 module "app" {
   source          = "./modules/containerized_service"
-  image           = "nginxdemos/hello"   # kleines Demo-Webapp-Image
+  image           = "simple-node-app"
   container_name  = "app-service"
   internal_port   = 80
   external_port   = 5000
@@ -42,25 +63,6 @@ module "app" {
     "DEBUG=false"
   ]
   network_name    = docker_network.app_network.name
-  volume_name     = null
-  mount_path      = null
-}
-
-
-module "app" {
-  source         = "./modules/containerized_service"
-  image          = var.app_image
-  container_name = var.app_container_name
-  network_name   = module.redis.network_name
-
-  ports = var.app_ports
-  env   = var.app_env
-
-  volumes = [
-    {
-      container_path = "/usr/src/app"
-      volume_name    = module.redis.app_data_volume_name
-      read_only      = false
-    }
-  ]
+  volume_name     = docker_volume.app_data.name
+  mount_path      = "/usr/src/app/data"
 }
