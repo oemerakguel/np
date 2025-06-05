@@ -1,29 +1,69 @@
+variable "image" {
+  type = string
+}
+
+variable "container_name" {
+  type = string
+}
+
+variable "network_name" {
+  type = string
+}
+
+variable "ports" {
+  type = list(object({
+    internal = number
+    external = number
+  }))
+  default = []
+}
+
+variable "env" {
+  type    = list(string)
+  default = []
+}
+
+variable "volumes" {
+  type = list(object({
+    container_path = string
+    volume_name    = string
+    read_only      = optional(bool, false)
+  }))
+  default = []
+}
+
+
 resource "docker_container" "this" {
-  name  = var.container_name
   image = var.image
-
-  env = var.environment_vars
-
-  ports {
-    internal = var.internal_port
-    external = var.external_port
-  }
+  name  = var.container_name
 
   networks_advanced {
     name = var.network_name
   }
 
-  dynamic "volumes" {
-    for_each = var.volume_name != null && var.mount_path != null ? [1] : []
-
+  dynamic "ports" {
+    for_each = var.ports
     content {
-      volume_name    = var.volume_name
-      container_path = var.mount_path
-      read_only      = false
+      internal = ports.value.internal
+      external = ports.value.external
+      protocol = "tcp"
+      ip       = "0.0.0.0"
     }
   }
 
-  restart = "no"
-  must_run = true
-  start = true
+  env           = var.env
+  restart       = "no"
+  must_run      = true
+  remove_volumes = true
+  start         = true
+
+  dynamic "volumes" {
+    for_each = var.volumes
+    content {
+      container_path = volumes.value.container_path
+      volume_name    = volumes.value.volume_name
+      read_only      = lookup(volumes.value, "read_only", false)
+    }
+  }
 }
+

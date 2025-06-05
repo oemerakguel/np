@@ -45,3 +45,22 @@ module "app" {
   volume_name     = null
   mount_path      = null
 }
+
+
+module "app" {
+  source         = "./modules/containerized_service"
+  image          = var.app_image
+  container_name = var.app_container_name
+  network_name   = module.redis.network_name
+
+  ports = var.app_ports
+  env   = var.app_env
+
+  volumes = [
+    {
+      container_path = "/usr/src/app"
+      volume_name    = module.redis.app_data_volume_name
+      read_only      = false
+    }
+  ]
+}
