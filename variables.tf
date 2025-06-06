@@ -29,3 +29,21 @@ variable "app_env" {
   type        = list(string)
   default     = []
 }
+
+variable "ports" {
+  description = "Liste von Ports, die an den Container gebunden werden"
+  type = list(object({
+    internal = number
+    external = number
+  }))
+  default = []
+}
+
+variable "nginx_ports" {
+  description = "Liste von Ports, die an den Container gebunden werden"
+  type = list(object({
+    internal = number
+    external = number
+  }))
+  default = []
+}

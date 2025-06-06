@@ -25,8 +25,7 @@ module "redis" {
   source          = "./modules/containerized_service"
   image           = "redis:7-alpine"
   container_name  = "redis-service"
-  internal_port   = 6379
-  external_port   = 6379
+  #external_port   = 6379
   environment_vars = []
   network_name    = docker_network.app_network.name
   volume_name     = docker_volume.app_data.name
@@ -37,8 +36,14 @@ module "nginx" {
   source          = "./modules/containerized_service"
   image           = "nginx:alpine"
   container_name  = "nginx-service"
-  internal_port   = 80
-  external_port   = 80
+ # internal_ports   = var.nginx_ports
+ # external_ports = var.nginx_ports
+   ports = [
+    {
+      internal = 80
+      external = 8080
+    }
+  ]
   environment_vars = []
   network_name    = docker_network.app_network.name
 
@@ -56,8 +61,14 @@ module "app" {
   source          = "./modules/containerized_service"
   image           = "simple-node-app"
   container_name  = "app-service"
-  internal_port   = 80
-  external_port   = 5000
+ # internal_ports   = var.app_ports
+ # external_ports = var.app_ports
+   ports = [
+    {
+      internal = 80
+      external = 8081
+    }
+  ]
   environment_vars = [
     "ENV=production",
     "DEBUG=false"

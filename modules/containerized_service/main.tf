@@ -43,5 +43,5 @@ resource "docker_container" "this" {
       read_only = false
     }
   }
-  
+
 }
