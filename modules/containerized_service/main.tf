@@ -32,16 +32,16 @@ resource "docker_container" "this" {
     }
   }
 
-dynamic "mounts" {
-  for_each = var.volumes
-  content {
-    target    = mounts.value.container_path
-    source    = mounts.value.volume_name
-    type      = "bind"
-    read_only = lookup(mounts.value, "read_only", false)
+
+  dynamic "mounts" {
+    for_each = var.volume_name != null && var.mount_path != null ? [1] : []
+
+    content {
+      target = var.mount_path  # z.B. "/etc/nginx/nginx.conf"
+      source = var.volume_name # Volume-Name
+      type   = "volume"
+      read_only = false
+    }
   }
+  
 }
-
-}
-
-
